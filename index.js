@@ -1,38 +1,70 @@
-const fs = require('fs');
+const fs = require("fs");
 
-// Defina as variáveis que você deseja substituir
-const replacements = {
-  nome_pessoa: 'Nome da Pessoa',
-  forma_de_pagamento: 'Forma de Pagamento',
-  valor_pago: '100,00',
-  data_pagamento: '01/09/2023',
-};
+const template_html = fs.readFileSync("index.html", "utf8");
 
-// Leia o arquivo HTML
-fs.readFile('index.html', 'utf8', (err, data) => {
-  if (err) {
-    console.error('Erro ao ler o arquivo HTML:', err);
-    return;
-  }
+const makeHTML = (replacements) => {
+  const html = replaceVariables(template_html, replacements);
 
-  // Substitua as variáveis no HTML
-  const html = replaceVariables(data, replacements);
-
-  // Escreva o HTML modificado de volta no arquivo
-  fs.writeFile('seu-arquivo-modificado.html', html, 'utf8', (err) => {
-    if (err) {
-      console.error('Erro ao escrever o arquivo HTML modificado:', err);
-    } else {
-      console.log('Variáveis substituídas com sucesso.');
+  fs.writeFile(
+    `mails/recibo-senha-${replacements.senha}.html`,
+    html,
+    "utf8",
+    (err) => {
+      if (err) {
+        console.error("Erro ao escrever o arquivo HTML modificado:", err);
+      } else {
+        console.log("Variáveis substituídas com sucesso.");
+      }
     }
-  });
-});
+  );
+};
 
 // Função para substituir as variáveis no HTML
 function replaceVariables(html, replacements) {
   for (const key in replacements) {
-    const regex = new RegExp(`{{${key}}}`, 'g');
+    const regex = new RegExp(`{{${key}}}`, "g");
     html = html.replace(regex, replacements[key]);
   }
   return html;
 }
+
+function prepareHistory(history) {
+  const more_than_one =
+    history.length > 1 ? "<div>Seu histórico de contribuições:</div>" : "";
+  let final = `${more_than_one}
+    
+    `;
+  const historyTemplate = `
+        <div></div>
+        <span>{{data_pagamento}} - R$ {{valor_pago}} - {{data_pagamento}}</span>
+    `;
+  const history_after_first = history.slice(1, 4);
+
+  for (const item of history_after_first) {
+    const replaced = prepareReplacements(item);
+    const html = replaceVariables(historyTemplate, replaced);
+    final += html;
+  }
+
+  return final;
+}
+
+function prepareReplacements(data) {
+  return {
+    nome_pessoa: data.Senha,
+    senha: data.Senha,
+    forma_de_pagamento: data.Modo,
+    valor_pago: data.Valor,
+    data_pagamento: data["Data de compensação"],
+  };
+}
+
+module.exports = {
+  prepareMail: (data) => {
+    const history = prepareHistory(data.history);
+    const actual = data.history[0];
+    const replacements = prepareReplacements(actual);
+    replacements.historico_contribuicoes = history;
+    makeHTML(replacements);
+  },
+};

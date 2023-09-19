@@ -4,6 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "node index.js"
+    "start": "node main.js"
+  },
+  "dependencies": {
+    "csv-parser": "^3.0.0"
   }
-  }
+}

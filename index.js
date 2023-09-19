@@ -1,10 +1,12 @@
 const fs = require("fs");
+const { sendMail } = require("./mailer");
 
 const template_html = fs.readFileSync("index.html", "utf8");
 
-const makeHTML = (replacements) => {
+const makeHTML = async (replacements) => {
   const html = replaceVariables(template_html, replacements);
-
+  await sendMail({html: html, to: replacements.email, subject: 'Recibo de contribuição'});
+  setTimeout(() => {}, 1000);
   fs.writeFile(
     `mails/recibo-senha-${replacements.senha}.html`,
     html,
@@ -64,6 +66,7 @@ module.exports = {
     const history = prepareHistory(data.history);
     const actual = data.history[0];
     const replacements = prepareReplacements(actual);
+    replacements.email = 'brizollajr@gmail.com'
     replacements.historico_contribuicoes = history;
     makeHTML(replacements);
   },

@@ -3,13 +3,13 @@ const csv = require('csv-parser');
 const { prepareMail } = require('.');
 
 const results = [];
-
+const timer = ms => new Promise(res => setTimeout(res, ms))
 fs.createReadStream('example.csv')
   .pipe(csv({ separator: ';' })) // Defina o separador correto
   .on('data', (data) => {
     results.push(data);
   })
-  .on('end', () => {
+  .on('end', async () => {
     // Agora 'results' contém os dados da planilha
     console.log('Dados extraídos da planilha:');
     
@@ -29,7 +29,16 @@ fs.createReadStream('example.csv')
       };
     });
 
-    for (const item of groupedArray) {
-      prepareMail(item);
+    // for (const item of groupedArray) {
+    //   prepareMail(item);
+    // }
+    // prepareMail(groupedArray[0]);
+    for(let i = 0; i < groupedArray.length; i++){
+      
+      //wait a second to avoid outlook block
+      console.log('teste')
+      
+      prepareMail(groupedArray[i]);
+      await timer(5000);
     }
   });

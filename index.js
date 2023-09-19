@@ -1,7 +1,7 @@
 const fs = require("fs");
 const { sendMail } = require("./mailer");
 
-const template_html = fs.readFileSync("index.html", "utf8");
+const template_html = fs.readFileSync("template.html", "utf8");
 
 const makeHTML = async (replacements) => {
   const html = replaceVariables(template_html, replacements);

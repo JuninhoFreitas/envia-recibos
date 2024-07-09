@@ -1,0 +1,185 @@
+{
+  "name": "Enviar Recibos de Ofertas",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "74d03320-d234-480d-914a-ee20c93ac213",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        880,
+        380
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/14HAAOWKM3LIxOzyXKvYohQJPnOggdgbP0vR-XtbDQl0/edit?gid=247123097#gid=247123097",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 247123097,
+          "mode": "list",
+          "cachedResultName": "example.csv",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14HAAOWKM3LIxOzyXKvYohQJPnOggdgbP0vR-XtbDQl0/edit#gid=247123097"
+        },
+        "options": {}
+      },
+      "id": "beaef73c-ec84-42d5-b1e4-b3e7f0393d18",
+      "name": "Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [
+        1100,
+        380
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "uZiY3GcelTmr5fzF",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const grouped = $input.all().reduce((acc, curr) => {\n  if (!acc[curr.json.Senha]) {\n    acc[curr.json.Senha] = [];\n  }\n  acc[curr.json.Senha].push(curr.json);\n  return acc;\n}, {});\n\n  const groupedArray = Object.keys(grouped).map((senha) => {\n    return {\n      senha,\n      history: grouped[senha],\n    };\n  });\n\n\nreturn groupedArray"
+      },
+      "id": "314c6e23-bfb5-4699-9f32-6449c2882219",
+      "name": "Filtrar por Senha",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Add a new field called 'myNewField' to the JSON of the item\n// $input.item.json.myNewField = 1;\n\n\nfunction replaceVariables(html, replacements) {\n  for (const key in replacements) {\n    const regex = new RegExp(`{{${key}}}`, \"g\");\n    html = html.replace(regex, replacements[key]);\n  }\n  return html;\n}\n\nfunction prepareHistory(history) {\n  const more_than_one =\n    history.length > 1 ? \"<div>Seu histórico de contribuições:</div>\" : \"\";\n  let final = `${more_than_one}\n    \n    `;\n  const historyTemplate = `\n        <div></div>\n        <span>{{data_pagamento}} - R$ {{valor_pago}} - {{data_pagamento}}</span>\n    `;\n  const history_after_first = history.slice(1, 4);\n\n  for (const item of history_after_first) {\n    const replaced = prepareReplacements(item);\n    const html = replaceVariables(historyTemplate, replaced);\n    final += html;\n  }\n\n  return final;\n}\n\nfunction prepareReplacements(data) {\n  return {\n    nome_pessoa: data.Senha,\n    senha: data.Senha,\n    forma_de_pagamento: data.Modo,\n    valor_pago: data.Valor,\n    data_pagamento: data[\"Data de compensação\"],\n  };\n}\n\nconst history = prepareHistory($input.item.json.history);\nconst actual = $input.item.json.history[0];\nconst replacements = prepareReplacements(actual);\nreplacements.email = 'brizollajr@gmail.com'\nreplacements.historico_contribuicoes = history;\n\nreturn replacements\n\n\n\n// return $input.item;"
+      },
+      "id": "c96023eb-cfed-45e1-ac53-6255269da9f5",
+      "name": "Criar Histórico de Ofertas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1540,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "html": "<!DOCTYPE html>\n<html>\n<head>\n</head>\n<body>\n  <table id=\"m_7866606354378174766m_328855828544689943gmail-m_7016522668112545603m_-6864618008411767407gmail-m_130464331423885958m_-3812781933530680607gmail-m_-2302786686969840872receipt-container\" style=\"margin:0px auto 10px;width:500px;height:499px\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\">\n    <tbody>\n      <tr style=\"height:33px\">\n        <td style=\"width:9.05px;height:33px\">&nbsp;</td>\n        <td style=\"width:33.1333px;padding:8px 16px;box-sizing:border-box;border-radius:8px 0px 0px;border-color:rgb(51,153,51) currentcolor currentcolor rgb(51,153,51);border-style:solid none none solid;border-width:1px 0px 0px 1px;background-color:rgb(51,153,51);text-align:center;color:rgb(255,255,255);height:33px\">&nbsp;</td>\n        <td style=\"width:404.633px;background-color:rgb(51,153,51);margin:0px;padding:0px;vertical-align:top;text-align:center;border-left:1px solid rgb(51,153,51);border-right:1px solid rgb(51,153,51);height:33px\">\n          <div style=\"box-sizing:border-box;border:1px solid rgb(224,224,224);border-radius:0px 0px 4px 4px;background-color:rgb(255,255,255);color:rgb(117,117,117);font-size:14px;font-weight:bold;line-height:19px;text-align:center\">Recibo de pagamento</div>\n        </td>\n        <td style=\"width:33.1333px;padding:8px 16px;box-sizing:border-box;border-color:rgb(51,153,51) rgb(51,153,51) currentcolor currentcolor;border-style:solid solid none none;border-width:1px 1px 0px 0px;border-radius:0px 8px 0px 0px;background-color:rgb(51,153,51);text-align:center;color:rgb(255,255,255);height:33px\">&nbsp;</td>\n        <td style=\"width:12.05px;height:33px\">&nbsp;</td>\n      </tr>\n      <tr style=\"height:373px\">\n        <td style=\"box-sizing:border-box;border:1px solid rgb(224,224,224);border-radius:8px;background-color:rgb(255,255,255);padding:24px 16px;color:rgb(117,117,117);font-size:16px;line-height:22px;width:498px;height:373px\" colspan=\"5\">\n          <span>\n            <p style=\"margin:0px 0px 24px\">Prezado <span style=\"font-weight:bold\">{{$json.nome_pessoa}}</span>!</p>\n            <p style=\"margin:0px 0px 24px\">Recebemos sua contribuição conforme dados a seguir.</p>\n            <div><label style=\"font-weight:bold\">Forma de pagamento:</label> {{$json.forma_de_pagamento}}</div>\n            <div><label style=\"font-weight:bold\">Valor pago:</label> R$ {{ $json.valor_pago}}</div>\n            <div><label style=\"font-weight:bold\">Data do pagamento:</label> {{$json.data_pagamento}}</div>\n            <div><label style=\"font-weight:bold\"></label></div>\n            <div>&nbsp;</div>\n            <div>Agradecemos e louvamos a Deus por sua fidelidade e disposição em contribuir com seu Reino.</div>\n            <div><br></div>\n            {{$json.historico_contribuicoes}}\n          </span>\n          <div style=\"border-top:1px solid rgb(224,224,224);padding-top:16px;box-sizing:border-box\">\n            <img src=\"https://i.imgur.com/esc6i4e.gif\" alt=\"unidos.gif\" style=\"margin-right:0px\" width=\"66\" height=\"81\">\n            <span>\n              <ul style=\"display:inline-block;margin:0px;padding:0px;line-height:17px;color:rgb(117,117,117);font-size:12px;list-style:outside none none\">\n                <li>IGREJA BÍBLICA UNIDOS NO SENHOR</li>\n                <li>R. Machado de Assis, 620 - Novo Hamburgo - RS<br></li>\n                <li><a style=\"color:rgb(29,169,218)\" href=\"mailto:tesouraria@unidosnosenhor.com.br\" rel=\"noopener\" target=\"_blank\">tesouraria@unidosnosenhor.com.<wbr>br</a></li>\n                <li>(51) 3594-4315</li>\n              </ul>\n              <br>\n            </span>\n          </div>\n        </td>\n      </tr>\n      <tr style=\"height:56px\">\n        <td style=\"width:9.05px;height:56px\">&nbsp;</td>\n        <td style=\"background-color:rgb(51,153,51);padding:8px 16px;box-sizing:border-box;border-color:currentcolor rgb(51,153,51);border-style:none solid;border-width:0px 1px;color:rgb(255,255,255);font-size:11px;line-height:14px;width:472.9px;height:56px\" colspan=\"3\">\"Seu Pai, que vê o que é feito em segredo, o recompensará.\" (Mateus 6:4)<br>Este recibo não possui valor fiscal, servindo para fins informativos.<br></td>\n        <td style=\"width:12.05px;height:56px\">&nbsp;</td>\n      </tr>\n      <tr style=\"height:37px\">\n        <td style=\"width:9.05px;height:37px\">&nbsp;</td>\n        <td style=\"background-color:rgb(51,153,51);box-sizing:border-box;border-color:rgb(51,153,51) rgb(51,153,51) currentcolor;border-style:solid solid none;border-width:1px 1px 0px;border-radius:0px 0px 8px 8px;width:472.9px;height:37px\" colspan=\"3\">\n          <div style=\"background:rgb(255,255,255) none repeat scroll 0% 0%;margin:0px 24px;padding:4px 16px;box-sizing:border-box;border:1px solid rgb(51,153,51);border-radius:8px 8px 0px 0px;color:rgb(117,117,117);font-size:11px;line-height:14px;text-align:center\">\n            <a href=\"http://www.unidosnosenhor.com.br\" target=\"_blank\" data-saferedirecturl=\"https://www.google.com/url?hl=pt-BR&amp;q=http://www.unidosnosenhor.com.br&amp;source=gmail&amp;ust=1695181525137000&amp;usg=AOvVaw3nrjtJ6yRmiNZ6OOJc6akc\">www.unidosnosenhor.com.br</a>\n          </div>\n        </td>\n      </tr>\n    </tbody>\n  </table>\n</body>\n</html>\n"
+      },
+      "id": "1eee0869-48e2-4a1d-b166-5df27518359b",
+      "name": "Gerar Template HTML",
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        1760,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "lucas.wag@gmail.com",
+        "subject": "Recibo Ofertas",
+        "message": "={{ $json.html }}",
+        "options": {}
+      },
+      "id": "cdb7dd6c-6c14-48b0-8584-ca899423cee3",
+      "name": "Enviar Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1980,
+        380
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "awwXd40jVjWFpyVN",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Filtrar por Senha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar por Senha": {
+      "main": [
+        [
+          {
+            "node": "Criar Histórico de Ofertas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Histórico de Ofertas": {
+      "main": [
+        [
+          {
+            "node": "Gerar Template HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gerar Template HTML": {
+      "main": [
+        [
+          {
+            "node": "Enviar Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "4ff4f403-063e-4e6e-86a8-704efa675bb2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "12852630403cd4f13b88ff44c326c1be4b99428be92e5cefa0cddbe11922ea2d"
+  },
+  "id": "TGRwz13Jb6q6AbTt",
+  "tags": [
+    {
+      "name": "financeiro",
+      "id": "daKCNJHxDWhWpyqI",
+      "createdAt": "2024-07-09T03:52:39.961Z",
+      "updatedAt": "2024-07-09T03:52:39.961Z"
+    }
+  ]
+}

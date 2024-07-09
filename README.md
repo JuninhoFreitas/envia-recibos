@@ -1,10 +1,25 @@
 # Envio de Recibos por Email - README
 
-Este é um aplicativo Node.js para enviar recibos por e-mail para membros da igreja que fizeram ofertas ou pagaram o dízimo. Certifique-se de seguir as etapas abaixo para configurar e executar o aplicativo.
+Este é um aplicativo feito no N8N para enviar recibos por e-mail para membros da igreja que fizeram ofertas ou pagaram o dízimo. Certifique-se de seguir as etapas abaixo para configurar e executar o aplicativo.
 
 ## Pré-requisitos
 
-Antes de começar, você precisará ter o Node.js instalado em sua máquina. Você pode baixá-lo e instalá-lo a partir do [site oficial do Node.js](https://nodejs.org/).
+Antes de começar, você precisará ter o Docker instalado em sua máquina. Você pode baixá-lo e instalá-lo a partir do [Site oficial do Docker](https://www.docker.com/).
+
+## Configuração
+
+1. Renomeie o arquivo `.env.example` para `.env`.
+
+2. Abra o arquivo `.env` em um editor de texto realize as configurações necessárias. Por exemplo:
+
+```
+POSTGRES_USER=changeUser
+POSTGRES_PASSWORD=changePassword
+POSTGRES_DB=n8n
+
+POSTGRES_NON_ROOT_USER=changeUser
+POSTGRES_NON_ROOT_PASSWORD=changePassword
+```
 
 ## Instalação
 
@@ -15,38 +30,26 @@ Antes de começar, você precisará ter o Node.js instalado em sua máquina. Voc
 3. Execute o seguinte comando para instalar as dependências do projeto:
 
 ```
-npm install
+docker compose up -d
 ```
 
 
-## Configuração
 
-1. Renomeie o arquivo `.env.example` para `.env`.
-
-2. Abra o arquivo `.env` em um editor de texto e insira suas credenciais de e-mail e outras configurações necessárias. Por exemplo:
-
-```
-EMAIL_USER=sua_conta_de_email@outlook.com
-EMAIL_PASS=sua_senha_de_email
-```
-
-
-Certifique-se de usar uma conta de e-mail que permita o envio via SMTP. Recomendamos o uso de contas Outlook para uma configuração mais fácil. Se você estiver usando outra conta de e-mail, verifique se as configurações SMTP correspondem e modifique o arquivo `mailer.js` conforme necessário.
 
 ## Executando o Aplicativo
 
-Depois de configurar suas credenciais e configurar o arquivo `.env`, você pode executar o aplicativo com o seguinte comando:
+Depois de executar o comando `docker compose up -d` o aplicativo estará rodando nessa URL
 
 ```
-npm run start
+http://localhost:5678
 ```
 
-
-O aplicativo começará a enviar recibos por e-mail para os membros da igreja com base nos dados fornecidos no seu código.
+Então você deverá criar sua conta dentro do N8N, após isso, importe o workflow que está no repositório nomeado como "Enviar_Recibos_de_Ofertas.json",
+Faça as modificações necessárias para sua planilha, há um exemplo de como fizemos na nossa no arquivo "example.csv"
 
 ## Dicas Adicionais
 
-- Certifique-se de que os membros da igreja e os detalhes dos recibos estejam corretamente configurados no código-fonte do aplicativo.
+- Certifique-se de que os membros da igreja e os detalhes dos recibos estejam corretamente configurados na planilha
 
 - Mantenha suas credenciais de e-mail seguras e não compartilhe o arquivo `.env` publicamente.
 
